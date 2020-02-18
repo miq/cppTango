@@ -1,13 +1,26 @@
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    project(tangod)
-else(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    project(tango)
-endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+project(tango)
 
 if(CMAKE_CL_64)
     add_definitions(-D_64BITS)
 endif(CMAKE_CL_64)
+
+set(TANGO_LIBRARY_NAME tango)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(TANGO_LIBRARY_NAME ${TANGO_LIBRARY_NAME}d)
+endif()
+
+# The name without the variant tag (i.e. -static)
+set(TANGO_LIBRARY_OUTPUT_NAME ${TANGO_LIBRARY_NAME})
+
+if (TANGO_BUILD_SHARED)
+    # https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html
+    set(BUILD_SHARED_LIBS ON)
+else()
+    set(TANGO_LIBRARY_NAME ${TANGO_LIBRARY_NAME}-static)
+endif()
+
+message("Tango library is '${TANGO_LIBRARY_NAME}'")
 
 #dump version into a file, later used by AppVeyor
 file(WRITE ${PROJECT_BINARY_DIR}/VERSION ${LIBRARY_VERSION})
@@ -21,134 +34,48 @@ if(PTHREAD_WIN)
     link_directories(${PTHREAD_WIN}/lib)
 endif(PTHREAD_WIN)
 
+add_library(${TANGO_LIBRARY_NAME} $<TARGET_OBJECTS:log4tango_objects>
+        $<TARGET_OBJECTS:idl_objects>
+        $<TARGET_OBJECTS:client_objects>
+        $<TARGET_OBJECTS:jpeg_objects>
+        $<TARGET_OBJECTS:jpeg_mmx_objects>
+        $<TARGET_OBJECTS:server_objects>)
+
+set_target_properties(${TANGO_LIBRARY_NAME} PROPERTIES COMPILE_DEFINITIONS
+        "${windows_defs}")
+
+target_compile_options(${TANGO_LIBRARY_NAME} PUBLIC ${ZMQ_PKG_CFLAGS_OTHER} ${OMNIORB_PKG_CFLAGS_OTHER} ${OMNICOS_PKG_CFLAGS_OTHER} ${OMNIDYN_PKG_CFLAGS_OTHER})
+
+if(TANGO_BUILD_SHARED)
+    target_link_libraries(${TANGO_LIBRARY_NAME} PUBLIC ${WIN32_LIBS} ${OMNIORB_PKG_LIBRARIES_DYN} ${ZMQ_PKG_LIBRARIES_DYN} ${PTHREAD_WIN_PKG_LIBRARIES_DYN} ${CMAKE_DL_LIBS})
+else()
+    target_link_libraries(${TANGO_LIBRARY_NAME} PUBLIC ${WIN32_LIBS} ${OMNIORB_PKG_LIBRARIES_STA} ${ZMQ_PKG_LIBRARIES_STA} ${PTHREAD_WIN_PKG_LIBRARIES_STA} ${CMAKE_DL_LIBS})
+    set_target_properties(${TANGO_LIBRARY_NAME} PROPERTIES OUTPUT_NAME ${TANGO_LIBRARY_OUTPUT_NAME})
+    set_target_properties(${TANGO_LIBRARY_NAME} PROPERTIES PREFIX "lib")
+endif()
+
+set_property(TARGET ${TANGO_LIBRARY_NAME} PROPERTY LINK_FLAGS "/force:multiple")
+set_property(TARGET ${TANGO_LIBRARY_NAME} PROPERTY PUBLIC_HEADER ${INCLUDE_OBJECT_MS})
+target_include_directories(${TANGO_LIBRARY_NAME}  PUBLIC ${ZMQ_PKG_INCLUDE_DIRS} ${OMNIORB_PKG_INCLUDE_DIRS} ${OMNIDYN_PKG_INCLUDE_DIRS})
+
+set_target_properties(${TANGO_LIBRARY_NAME} PROPERTIES
+        VERSION ${LIBRARY_VERSION}
+        SOVERSION ${SO_VERSION})
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-    add_library(tangod-static STATIC    $<TARGET_OBJECTS:log4tango_objects_sta>
-                                        $<TARGET_OBJECTS:idl_objects_sta>
-                                        $<TARGET_OBJECTS:client_objects_sta>
-                                        $<TARGET_OBJECTS:jpeg_objects_sta>
-                                        $<TARGET_OBJECTS:jpeg_mmx_objects_sta>
-                                        $<TARGET_OBJECTS:server_objects_sta>)
-    add_library(tangod SHARED   $<TARGET_OBJECTS:log4tango_objects_dyn>
-                                $<TARGET_OBJECTS:idl_objects_dyn>
-                                $<TARGET_OBJECTS:client_objects_dyn>
-                                $<TARGET_OBJECTS:jpeg_objects_dyn>
-                                $<TARGET_OBJECTS:jpeg_mmx_objects_dyn>
-                                $<TARGET_OBJECTS:server_objects_dyn>)
-
-    message("static_defs: ${static_defs}")
-
-    set_target_properties(tangod-static PROPERTIES COMPILE_DEFINITIONS
-                          "${static_defs}")
-
-    message("dyn_defs: ${dyn_defs}")
-
-    set_target_properties(tangod PROPERTIES COMPILE_DEFINITIONS
-                          "${dyn_defs}")
-
-    target_compile_options(tangod PUBLIC ${ZMQ_PKG_CFLAGS_OTHER} ${OMNIORB_PKG_CFLAGS_OTHER} ${OMNICOS_PKG_CFLAGS_OTHER} ${OMNIDYN_PKG_CFLAGS_OTHER})
-    target_compile_options(tangod-static PUBLIC ${ZMQ_PKG_CFLAGS_OTHER} ${OMNIORB_PKG_CFLAGS_OTHER} ${OMNICOS_PKG_CFLAGS_OTHER} ${OMNIDYN_PKG_CFLAGS_OTHER} "/MTd")
-
-    target_link_libraries(tangod PUBLIC ${WIN32_LIBS} ${OMNIORB_PKG_LIBRARIES_DYN} ${ZMQ_PKG_LIBRARIES_DYN} ${PTHREAD_WIN_PKG_LIBRARIES_DYN} ${CMAKE_DL_LIBS})
-    target_link_libraries(tangod-static PUBLIC ${WIN32_LIBS} ${OMNIORB_PKG_LIBRARIES_STA} ${ZMQ_PKG_LIBRARIES_STA} ${PTHREAD_WIN_PKG_LIBRARIES_STA} ${CMAKE_DL_LIBS})
-
-    set_property(TARGET tangod PROPERTY LINK_FLAGS "/force:multiple")
-    set_property(TARGET tangod PROPERTY PUBLIC_HEADER ${INCLUDE_OBJECT_MS})
-    set_property(TARGET tangod-static PROPERTY LINK_FLAGS "/force:multiple")
-    set_property(TARGET tangod-static PROPERTY PUBLIC_HEADER ${INCLUDE_OBJECT_MS})
-
-    target_include_directories(tangod PUBLIC ${ZMQ_PKG_INCLUDE_DIRS} ${OMNIORB_PKG_INCLUDE_DIRS} ${OMNIDYN_PKG_INCLUDE_DIRS})
-    target_include_directories(tangod-static PUBLIC ${ZMQ_PKG_INCLUDE_DIRS} ${OMNIORB_PKG_INCLUDE_DIRS} ${OMNIDYN_PKG_INCLUDE_DIRS})
-
-    set_target_properties(tangod-static PROPERTIES OUTPUT_NAME "tangod")
-    set_target_properties(tangod-static PROPERTIES PREFIX "lib")
-
-    set_target_properties(tangod PROPERTIES
-                          VERSION ${LIBRARY_VERSION}
-                          SOVERSION ${SO_VERSION})
-    set_target_properties(tangod-static PROPERTIES
-                          VERSION ${LIBRARY_VERSION}
-                          SOVERSION ${SO_VERSION})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Debug)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Debug)
     set(CMAKE_INSTALL_CONFIG_NAME Debug)
-else(CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-    add_library(tango-static STATIC $<TARGET_OBJECTS:log4tango_objects_sta>
-                                    $<TARGET_OBJECTS:idl_objects_sta>
-                                    $<TARGET_OBJECTS:client_objects_sta>
-                                    $<TARGET_OBJECTS:jpeg_objects_sta>
-                                    $<TARGET_OBJECTS:jpeg_mmx_objects_sta>
-                                    $<TARGET_OBJECTS:server_objects_sta>)
-    add_library(tango SHARED    $<TARGET_OBJECTS:log4tango_objects_dyn>
-                                $<TARGET_OBJECTS:idl_objects_dyn>
-                                $<TARGET_OBJECTS:client_objects_dyn>
-                                $<TARGET_OBJECTS:jpeg_objects_dyn>
-                                $<TARGET_OBJECTS:jpeg_mmx_objects_dyn>
-                                $<TARGET_OBJECTS:server_objects_dyn>)
-
-    message("static_defs: ${static_defs}")
-
-    set_target_properties(tango-static PROPERTIES COMPILE_DEFINITIONS
-                          "${static_defs}")
-
-    message("dyn_defs: ${dyn_defs}")
-
-    set_target_properties(tango PROPERTIES COMPILE_DEFINITIONS
-                          "${dyn_defs}")
-
-    set_target_properties(tango-static PROPERTIES OUTPUT_NAME "tango")
-    set_target_properties(tango-static PROPERTIES PREFIX "lib")
- 
-    target_compile_options(tango PUBLIC ${ZMQ_PKG_CFLAGS_OTHER} ${OMNIORB_PKG_CFLAGS_OTHER} ${OMNICOS_PKG_CFLAGS_OTHER} ${OMNIDYN_PKG_CFLAGS_OTHER})
-    target_compile_options(tango-static PUBLIC ${ZMQ_PKG_CFLAGS_OTHER} ${OMNIORB_PKG_CFLAGS_OTHER} ${OMNICOS_PKG_CFLAGS_OTHER} ${OMNIDYN_PKG_CFLAGS_OTHER} "/MT")
-
-    target_link_libraries(tango PUBLIC ${WIN32_LIBS} ${OMNIORB_PKG_LIBRARIES_DYN} ${ZMQ_PKG_LIBRARIES_DYN} ${PTHREAD_WIN_PKG_LIBRARIES_DYN} ${CMAKE_DL_LIBS})
-    target_link_libraries(tango-static PUBLIC ${WIN32_LIBS} ${OMNIORB_PKG_LIBRARIES_STA} ${ZMQ_PKG_LIBRARIES_STA} ${PTHREAD_WIN_PKG_LIBRARIES_STA} ${CMAKE_DL_LIBS})
-
-    set_property(TARGET tango PROPERTY LINK_FLAGS "/force:multiple")
-    set_property(TARGET tango PROPERTY PUBLIC_HEADER ${INCLUDE_OBJECT_MS})
-    set_property(TARGET tango-static PROPERTY LINK_FLAGS "/force:multiple")
-    set_property(TARGET tango-static PROPERTY PUBLIC_HEADER ${INCLUDE_OBJECT_MS})
-
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
-
-    target_include_directories(tango PUBLIC ${ZMQ_PKG_INCLUDE_DIRS} ${OMNIORB_PKG_INCLUDE_DIRS} ${OMNIDYN_PKG_INCLUDE_DIRS})
-    target_include_directories(tango-static PUBLIC ${ZMQ_PKG_INCLUDE_DIRS} ${OMNIORB_PKG_INCLUDE_DIRS} ${OMNIDYN_PKG_INCLUDE_DIRS})
-
-    set_target_properties(tango PROPERTIES
-                          VERSION ${LIBRARY_VERSION}
-                          SOVERSION ${SO_VERSION})
-    set_target_properties(tango-static PROPERTIES
-                          VERSION ${LIBRARY_VERSION}
-                          SOVERSION ${SO_VERSION})
-endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+endif()
 
 #install code
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-    install(TARGETS tangod-static
-            ARCHIVE DESTINATION lib COMPONENT static CONFIGURATIONS Debug
-            RUNTIME DESTINATION bin COMPONENT dynamic CONFIGURATIONS Debug)
-        
-    install(TARGETS tangod
-            ARCHIVE DESTINATION lib COMPONENT static CONFIGURATIONS Debug
-            RUNTIME DESTINATION bin COMPONENT dynamic CONFIGURATIONS Debug)
-else(CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-    install(TARGETS tango-static
-            ARCHIVE DESTINATION lib COMPONENT static
-            RUNTIME DESTINATION bin COMPONENT dynamic)
-        
-    install(TARGETS tango
-            ARCHIVE DESTINATION lib COMPONENT static
-            RUNTIME DESTINATION bin COMPONENT dynamic)
-endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+install(TARGETS ${TANGO_LIBRARY_NAME}
+        ARCHIVE DESTINATION lib COMPONENT static
+        RUNTIME DESTINATION bin COMPONENT dynamic)
 
 install(DIRECTORY log4tango/include/log4tango DESTINATION include COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hh" PATTERN "*.tpp" PATTERN "*.txt" EXCLUDE PATTERN "*.vcproj" EXCLUDE PATTERN "*.cpp" EXCLUDE PATTERN "*.in" EXCLUDE PATTERN "*.am" EXCLUDE PATTERN "CMakeFiles" EXCLUDE PATTERN "threading" EXCLUDE)
 install(DIRECTORY log4tango/include/log4tango/threading DESTINATION include/log4tango COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hh" PATTERN "*.tpp" PATTERN "*.txt" EXCLUDE PATTERN "*.vcproj" EXCLUDE PATTERN "*.cpp" EXCLUDE PATTERN "*.in" EXCLUDE PATTERN "*.am" EXCLUDE PATTERN "CMakeFiles" EXCLUDE)

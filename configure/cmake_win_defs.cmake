@@ -1,5 +1,6 @@
 #definitions and preprocessor
 option(TANGO_BUILD_SHARED "Build a shared library instead of static" ON)
+option(TANGO_INSTALL_DEPENDENCIES "Install the libraries that tango depends on" ON)
 
 add_definitions(-D_WIN32)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)

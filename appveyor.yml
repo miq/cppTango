@@ -21,7 +21,7 @@ environment:
       IDL_BIN: C:\Program Files\tangoidl
       OMNI_BASE: C:\projects\omniORB-4.2.1
       PYVER: "py37"
-      USE_PCH: ON
+      USE_PCH: OFF
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: win32
       ARCH: win32-msvc15
@@ -39,7 +39,7 @@ environment:
       IDL_BIN: C:\Program Files (x86)\tangoidl
       OMNI_BASE: C:\projects\omniORB-4.2.1
       PYVER: "py37"
-      USE_PCH: ON
+      USE_PCH: OFF
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: x64
       ARCH: x64-msvc14
@@ -57,7 +57,7 @@ environment:
       IDL_BIN: C:\Program Files\tangoidl
       OMNI_BASE: C:\projects\omniORB-4.2.1
       PYVER: "py36"
-      USE_PCH: ON
+      USE_PCH: OFF
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: win32
       ARCH: win32-msvc14
@@ -75,7 +75,7 @@ environment:
       IDL_BIN: C:\Program Files (x86)\tangoidl
       OMNI_BASE: C:\projects\omniORB-4.2.1
       PYVER: "py36"
-      USE_PCH: ON
+      USE_PCH: OFF
 
 init:
   # go to hell Xamarin (see http://help.appveyor.com/discussions/problems/4569)
@@ -114,8 +114,14 @@ install:
   - cmd: cd c:/projects/
   # in case of wrong directory for cloning
   - cmd: rename %APPVEYOR_BUILD_FOLDER% cppTango
-  - cmd: md debug_build
-  - cmd: xcopy "C:/projects/cppTango" "c:/projects/debug_build" /c /g /d /i /e /r /h /y
+  - cmd: md static_debug_build
+  - cmd: xcopy "C:/projects/cppTango" "c:/projects/static_debug_build" /c /g /d /i /e /r /h /y
+  - cmd: md static_release_build
+  - cmd: xcopy "C:/projects/cppTango" "c:/projects/static_release_build" /c /g /d /i /e /r /h /y
+  - cmd: md dynamic_debug_build
+  - cmd: xcopy "C:/projects/cppTango" "c:/projects/dynamic_debug_build" /c /g /d /i /e /r /h /y
+  - cmd: md dynamic_release_build
+  - cmd: xcopy "C:/projects/cppTango" "c:/projects/dynamic_release_build" /c /g /d /i /e /r /h /y
   # Setting Visual Compiler
   - cmd: cd "C:\projects\"
   - cmd: if %ARCH%==win32-msvc14 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
@@ -142,12 +148,17 @@ install:
   - cmd: if not defined USE_PCH set USE_PCH=OFF
   #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=TRUE .
   #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE .
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE="/MT" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% .
-  #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
-  - cmd: cd c:/projects/debug_build
-  #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=TRUE -DCMAKE_BUILD_TYPE=Debug .
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG="/MTd" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% .
-  #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DCMAKE_BUILD_TYPE=Debug -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
+  # Maybe TODO: Re-enable PCH
+  # Static builds
+  - cmd: cd c:/projects/static_release_build
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE="/MT" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
+  - cmd: cd c:/projects/static_debug_build
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG="/MTd" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
+  # Dynamic builds
+  - cmd: cd c:/projects/dynamic_release_build
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE  -DCMAKE_BUILD_TYPE=Release -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
+  - cmd: cd c:/projects/dynamic_debug_build
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DCMAKE_BUILD_TYPE=Debug -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
 
 clone_folder: C:\projects\cppTango
 
@@ -156,26 +167,28 @@ build:
   verbosity: minimal
 
 build_script:
-  - cmd: cd C:/projects/cppTango
+  - cmd: cd C:/projects/static_release_build
   - cmake --build ./ --config Release
-  - cmd: cd c:/projects/debug_build
+  - cmd: cd c:/projects/static_debug_build
   - cmake --build ./ --config Debug
-  #- cmake --build ./ --target install  --config Debug
-
+  - cmd: cd C:/projects/dynamic_release_build
+  - cmake --build ./ --config Release
+  - cmd: cd c:/projects/dynamic_debug_build
+  - cmake --build ./ --config Debug
 
 after_build:
-  - cmd: cd C:/projects/cppTango
+  - cmd: cd C:/projects/static_release_build
   - cmd: set /p TANGO_LIB_VER=<VERSION
   - cmd: echo %TANGO_LIB_VER%
   # Generating installer
   - cmd: cpack -G WIX
   - cmd: cpack -G ZIP
-  - cmd: cd c:/projects/debug_build
+  - cmd: cd c:/projects/static_debug_build
   # Generating installer
   - cmd: cpack -C Debug -G WIX
   - cmd: cpack -C Debug -G ZIP
   # copying debug versions for upload
-  - cmd: cd c:/projects/debug_build
+  - cmd: cd c:/projects/static_debug_build
   - cmd: if %ARCH%==win32-msvc14 move libtango_%TANGO_LIB_VER%_v140_x86_debug.msi C:/projects/cppTango
   - cmd: if %ARCH%==win32-msvc14 move libtango_%TANGO_LIB_VER%_v140_x86_debug.zip C:/projects/cppTango
   - cmd: if %ARCH%==x64-msvc14 move libtango_%TANGO_LIB_VER%_v140_x64_debug.msi C:/projects/cppTango

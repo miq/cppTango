@@ -147,8 +147,7 @@ install:
   - cmd: set PTHREAD_WIN=C:/projects/pthreads-win32/
   - cmd: if not defined USE_PCH set USE_PCH=OFF
   #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=TRUE .
-  #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE .
-  # Maybe TODO: Re-enable PCH
+  #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -
   # Static builds
   - cmd: cd c:/projects/static_release_build
   - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE="/MT" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
@@ -159,6 +158,7 @@ install:
   - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE  -DCMAKE_BUILD_TYPE=Release -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
   - cmd: cd c:/projects/dynamic_debug_build
   - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DCMAKE_BUILD_TYPE=Debug -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% .
+
 
 clone_folder: C:\projects\cppTango
 
@@ -211,3 +211,20 @@ artifacts:
   - path: ./*.exe
   - path: ./*.zip
   - path: ./*.msi
+
+deploy:
+- provider: GitHub
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  description: "Release $(APPVEYOR_REPO_TAG_NAME)"
+  auth_token:
+    # User: cppTango-bot
+    # Personal Access token with repo scope, encrypted via https://ci.appveyor.com/tools/encrypt
+    secure: KnvPAbdhmiTQxTLOGq7nyNs6d1JYbKVKspPgigzQ3fDrI+nkaxqWCw6UmRkS2Gqe
+  artifact: /.*/
+  repository: tango-controls/cppTango
+  draft: true
+  prerelease: true
+  force_update: true
+  # deploy on tag push only
+  on:
+    APPVEYOR_REPO_TAG: true

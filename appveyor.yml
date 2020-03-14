@@ -115,13 +115,9 @@ install:
   # in case of wrong directory for cloning
   - cmd: rename %APPVEYOR_BUILD_FOLDER% cppTango
   - cmd: md static_debug_build
-  - cmd: xcopy "C:/projects/cppTango" "c:/projects/static_debug_build" /c /g /d /i /e /r /h /y
   - cmd: md static_release_build
-  - cmd: xcopy "C:/projects/cppTango" "c:/projects/static_release_build" /c /g /d /i /e /r /h /y
   - cmd: md dynamic_debug_build
-  - cmd: xcopy "C:/projects/cppTango" "c:/projects/dynamic_debug_build" /c /g /d /i /e /r /h /y
   - cmd: md dynamic_release_build
-  - cmd: xcopy "C:/projects/cppTango" "c:/projects/dynamic_release_build" /c /g /d /i /e /r /h /y
   # Setting Visual Compiler
   - cmd: cd "C:\projects\"
   - cmd: if %ARCH%==win32-msvc14 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
@@ -150,14 +146,14 @@ install:
   #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -
   # Static builds
   - cmd: cd c:/projects/static_release_build
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE="/MT" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF .
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE="/MT" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF ../cppTango
   - cmd: cd c:/projects/static_debug_build
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG="/MTd" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF .
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG="/MTd" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF ../cppTango
   # Dynamic builds
   - cmd: cd c:/projects/dynamic_release_build
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE  -DCMAKE_BUILD_TYPE=Release -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF .
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE  -DCMAKE_BUILD_TYPE=Release -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=OFF -DBUILD_TESTING=OFF ../cppTango
   - cmd: cd c:/projects/dynamic_debug_build
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DCMAKE_BUILD_TYPE=Debug -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF .
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DCMAKE_BUILD_TYPE=Debug -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=OFF -DBUILD_TESTING=OFF ../cppTango
 
 
 clone_folder: C:\projects\cppTango

@@ -177,16 +177,16 @@ after_build:
   - cmd: echo %TANGO_LIB_VER%
   # Generating installer
   - cmd: cd C:/projects/static_release_build
-  - cmd: cpack -G WIX
-  - cmd: cpack -G ZIP
+  - cmd: cpack -C Release -G WIX
+  - cmd: cpack -C Release -G ZIP
   # Generating installer
   - cmd: cd c:/projects/static_debug_build
   - cmd: cpack -C Debug -G WIX
   - cmd: cpack -C Debug -G ZIP
   # Generating installer
   - cmd: cd c:/projects/dynamic_release_build
-  - cmd: cpack -C Debug -G WIX
-  - cmd: cpack -C Debug -G ZIP
+  - cmd: cpack -C Release -G WIX
+  - cmd: cpack -C Release -G ZIP
   # Generating installer
   - cmd: cd c:/projects/dynamic_debug_build
   - cmd: cpack -C Debug -G WIX

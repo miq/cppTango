@@ -2,14 +2,20 @@ version: 0.0.{build}
 branches:
   only:
     - tango-9-lts
+
+configuration:
+  - Debug
+  - Release
+
 environment:
+  # Common variables
   IDL_BASE: C:\projects\tangoidl
   IDL_SOURCE: C:\projects\tangoidl-source
+  
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: x64
       ARCH: x64-msvc15
-      configuration: Release
       CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
       MSVCVERSION: v141
       MSVCYEAR: "vs2017"
@@ -22,7 +28,6 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: win32
       ARCH: win32-msvc15
-      configuration: Release
       CMAKE_GENERATOR: "Visual Studio 15 2017"
       MSVCVERSION: v141
       MSVCYEAR: "vs2017"
@@ -35,7 +40,6 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: x64
       ARCH: x64-msvc14
-      configuration: Release
       CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
       MSVCVERSION: v140
       MSVCYEAR: "vs2015"
@@ -48,7 +52,6 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: win32
       ARCH: win32-msvc14
-      configuration: Release
       CMAKE_GENERATOR: "Visual Studio 14 2015"
       MSVCVERSION: v140
       MSVCYEAR: "vs2015"
@@ -95,10 +98,8 @@ install:
   - cmd: cd c:/projects/
   # in case of wrong directory for cloning
   - cmd: rename %APPVEYOR_BUILD_FOLDER% cppTango
-  - cmd: md static_debug_build
-  - cmd: md static_release_build
-  - cmd: md dynamic_debug_build
-  - cmd: md dynamic_release_build
+  - cmd: md static_build
+  - cmd: md dynamic_build
   # Setting Visual Compiler
   - cmd: cd "C:\projects\"
   - cmd: if %ARCH%==win32-msvc14 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
@@ -124,16 +125,11 @@ install:
   #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=TRUE .
   #- cmd: cmake -G "%CMAKE_GENERATOR%" -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -
   # Static builds
-  - cmd: cd c:/projects/static_release_build
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE="/MT" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF ../cppTango
-  - cmd: cd c:/projects/static_debug_build
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG="/MTd" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF ../cppTango
+  - cmd: cd c:/projects/static_build
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DCMAKE_CXX_FLAGS_RELEASE="/MT" -DCMAKE_CXX_FLAGS_DEBUG="/MTd" -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=%USE_PCH% -DBUILD_TESTING=OFF ../cppTango
   # Dynamic builds
-  - cmd: cd c:/projects/dynamic_release_build
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE  -DCMAKE_BUILD_TYPE=Release -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=OFF -DBUILD_TESTING=OFF ../cppTango
-  - cmd: cd c:/projects/dynamic_debug_build
-  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DCMAKE_BUILD_TYPE=Debug -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=OFF -DBUILD_TESTING=OFF ../cppTango
-
+  - cmd: cd c:/projects/dynamic_build
+  - cmd: cmake -G "%CMAKE_GENERATOR%" -DTANGO_BUILD_SHARED=ON -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE  -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DIDL_BASE="%IDL_BASE%" -DOMNI_BASE="%OMNI_BASE%" -DZMQ_BASE="%ZMQ_BASE%" -DCPPZMQ_BASE="%CPPZMQ_BASE%" -DPTHREAD_WIN=%PTHREAD_WIN% -DUSE_PCH=OFF -DBUILD_TESTING=OFF ../cppTango
 
 clone_folder: C:\projects\cppTango
 
@@ -142,41 +138,25 @@ build:
   verbosity: minimal
 
 build_script:
-  - cmd: cd C:/projects/static_release_build
-  - cmake --build ./ --config Release
-  - cmd: cd c:/projects/static_debug_build
-  - cmake --build ./ --config Debug
-  - cmd: cd C:/projects/dynamic_release_build
-  - cmake --build ./ --config Release
-  - cmd: cd c:/projects/dynamic_debug_build
-  - cmake --build ./ --config Debug
+  - cmd: cd C:/projects/static_build
+  - cmake --build ./ --config %CONFIGURATION%
+  - cmd: cd C:/projects/dynamic_build
+  - cmake --build ./ --config %CONFIGURATION%
 
 after_build:
   - cmd: set /p TANGO_LIB_VER=<VERSION
   - cmd: echo %TANGO_LIB_VER%
   # Generate and move artifacts for all variants
-  # static / release
-  - cmd: cd C:/projects/static_release_build
-  - cmd: cpack -C Release -G WIX
-  - cmd: cpack -C Release -G ZIP
+  # static
+  - cmd: cd C:/projects/static_build
+  - cmd: cpack -C %CONFIGURATION% -G WIX
+  - cmd: cpack -C %CONFIGURATION% -G ZIP
   - cmd: move libtango_%TANGO_LIB_VER%*.msi C:/projects/cppTango
   - cmd: move libtango_%TANGO_LIB_VER%*.zip C:/projects/cppTango
-  # static / debug
-  - cmd: cd c:/projects/static_debug_build
-  - cmd: cpack -C Debug -G WIX
-  - cmd: cpack -C Debug -G ZIP
-  - cmd: move libtango_%TANGO_LIB_VER%*.msi C:/projects/cppTango
-  - cmd: move libtango_%TANGO_LIB_VER%*.zip C:/projects/cppTango
-  # dynamic / release
-  - cmd: cd c:/projects/dynamic_release_build
-  - cmd: cpack -C Release -G WIX
-  - cmd: cpack -C Release -G ZIP
-  - cmd: move libtango_%TANGO_LIB_VER%*.msi C:/projects/cppTango
-  - cmd: move libtango_%TANGO_LIB_VER%*.zip C:/projects/cppTango
-  # dynamic / debug
-  - cmd: cd c:/projects/dynamic_debug_build
-  - cmd: cpack -C Debug -G WIX
-  - cmd: cpack -C Debug -G ZIP
+  # dynamic
+  - cmd: cd c:/projects/dynamic_build
+  - cmd: cpack -C %CONFIGURATION% -G WIX
+  - cmd: cpack -C %CONFIGURATION% -G ZIP
   - cmd: move libtango_%TANGO_LIB_VER%*.msi C:/projects/cppTango
   - cmd: move libtango_%TANGO_LIB_VER%*.zip C:/projects/cppTango
 

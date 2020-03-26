@@ -1,33 +1,23 @@
 
+set(COMPILER_TAG ${CMAKE_VS_PLATFORM_TOOLSET})
+string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE_TAG)
+set(ARCH_TAG "x86")
+set(VARIANT_TAG "static")
+
 if(MSVC90)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        if(CMAKE_CL_64)
-            set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_v90_x64_debug)
-        else()
-            set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_v90_x86_debug)
-        endif()
-    else()
-        if(CMAKE_CL_64)
-            set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_v90_x64)
-        else()
-            set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_v90_x86)
-        endif()
-    endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-else()
-    if(CMAKE_CL_64)
-        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_${CMAKE_VS_PLATFORM_TOOLSET}_x64_debug)
-        else()
-            set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_${CMAKE_VS_PLATFORM_TOOLSET}_x64)
-        endif()
-    else()
-        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_${CMAKE_VS_PLATFORM_TOOLSET}_x86_debug)
-        else()
-            set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_${CMAKE_VS_PLATFORM_TOOLSET}_x86)
-        endif()
-    endif(CMAKE_CL_64)
-endif(MSVC90)
+    set(COMPILER_TAG "v90")
+endif()
+
+if(CMAKE_CL_64)
+    set(ARCH_TAG "x64")
+endif()
+
+if (TANGO_BUILD_SHARED)
+    set(VARIANT_TAG "shared")
+endif()
+
+set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_${COMPILER_TAG}_${ARCH_TAG}_${VARIANT_TAG}_${BUILD_TYPE_TAG})
+
 #
 # CPACK macros below here
 #

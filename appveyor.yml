@@ -175,32 +175,31 @@ build_script:
 after_build:
   - cmd: set /p TANGO_LIB_VER=<VERSION
   - cmd: echo %TANGO_LIB_VER%
-  # Generating installer
+  # Generate and move artifacts for all variants
+  # static / release
   - cmd: cd C:/projects/static_release_build
   - cmd: cpack -C Release -G WIX
   - cmd: cpack -C Release -G ZIP
-  # Generating installer
+  - cmd: move libtango_%TANGO_LIB_VER%*.msi C:/projects/cppTango
+  - cmd: move libtango_%TANGO_LIB_VER%*.zip C:/projects/cppTango
+  # static / debug
   - cmd: cd c:/projects/static_debug_build
   - cmd: cpack -C Debug -G WIX
   - cmd: cpack -C Debug -G ZIP
-  # Generating installer
+  - cmd: move libtango_%TANGO_LIB_VER%*.msi C:/projects/cppTango
+  - cmd: move libtango_%TANGO_LIB_VER%*.zip C:/projects/cppTango
+  # dynamic / release
   - cmd: cd c:/projects/dynamic_release_build
   - cmd: cpack -C Release -G WIX
   - cmd: cpack -C Release -G ZIP
-  # Generating installer
+  - cmd: move libtango_%TANGO_LIB_VER%*.msi C:/projects/cppTango
+  - cmd: move libtango_%TANGO_LIB_VER%*.zip C:/projects/cppTango
+  # dynamic / debug
   - cmd: cd c:/projects/dynamic_debug_build
   - cmd: cpack -C Debug -G WIX
   - cmd: cpack -C Debug -G ZIP
-  # copying debug versions for upload
-  - cmd: cd c:/projects/static_debug_build
-  - cmd: if %ARCH%==win32-msvc14 move libtango_%TANGO_LIB_VER%_v140_x86_debug.msi C:/projects/cppTango
-  - cmd: if %ARCH%==win32-msvc14 move libtango_%TANGO_LIB_VER%_v140_x86_debug.zip C:/projects/cppTango
-  - cmd: if %ARCH%==x64-msvc14 move libtango_%TANGO_LIB_VER%_v140_x64_debug.msi C:/projects/cppTango
-  - cmd: if %ARCH%==x64-msvc14 move libtango_%TANGO_LIB_VER%_v140_x64_debug.zip C:/projects/cppTango
-  - cmd: if %ARCH%==win32-msvc15 move libtango_%TANGO_LIB_VER%_v141_x86_debug.msi C:/projects/cppTango
-  - cmd: if %ARCH%==win32-msvc15 move libtango_%TANGO_LIB_VER%_v141_x86_debug.zip C:/projects/cppTango
-  - cmd: if %ARCH%==x64-msvc15 move libtango_%TANGO_LIB_VER%_v141_x64_debug.msi C:/projects/cppTango
-  - cmd: if %ARCH%==x64-msvc15 move libtango_%TANGO_LIB_VER%_v141_x64_debug.zip C:/projects/cppTango
+  - cmd: move libtango_%TANGO_LIB_VER%*.msi C:/projects/cppTango
+  - cmd: move libtango_%TANGO_LIB_VER%*.zip C:/projects/cppTango
 
 
 on_finish:
@@ -212,7 +211,6 @@ on_failure:
   # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 artifacts:
-  - path: ./*.exe
   - path: ./*.zip
   - path: ./*.msi
 

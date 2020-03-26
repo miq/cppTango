@@ -17,9 +17,6 @@ environment:
       VC_VER: 15.0
       PYTHONPATH: c:\Python37-x64\
       PYTHONPATHOMNI: "/cygdrive/c/Python37-x64/python"
-      BOOST_ROOT: C:\Libraries\boost_1_63_0
-      ZMQ_BASE: C:\projects\libzmq
-      OMNI_BASE: C:\projects\omniORB-4.2.1
       PYVER: "py37"
       USE_PCH: ON
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
@@ -33,9 +30,6 @@ environment:
       VC_VER: 15.0
       PYTHONPATH: c:\Python37\
       PYTHONPATHOMNI: "/cygdrive/c/Python37/python"
-      BOOST_ROOT: C:\Libraries\boost_1_63_0
-      ZMQ_BASE: C:\projects\libzmq
-      OMNI_BASE: C:\projects\omniORB-4.2.1
       PYVER: "py37"
       USE_PCH: ON
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
@@ -49,9 +43,6 @@ environment:
       VC_VER: 14.0
       PYTHONPATH: c:\Python36-x64\
       PYTHONPATHOMNI: "/cygdrive/c/Python36-x64/python"
-      BOOST_ROOT: C:\Libraries\boost_1_63_0
-      ZMQ_BASE: C:\projects\libzmq
-      OMNI_BASE: C:\projects\omniORB-4.2.1
       PYVER: "py36"
       USE_PCH: ON
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
@@ -65,9 +56,6 @@ environment:
       VC_VER: 14.0
       PYTHONPATH: c:\Python36\
       PYTHONPATHOMNI: "/cygdrive/c/Python36/python"
-      BOOST_ROOT: C:\Libraries\boost_1_63_0
-      ZMQ_BASE: C:\projects\libzmq
-      OMNI_BASE: C:\projects\omniORB-4.2.1
       PYVER: "py36"
       USE_PCH: ON
 
@@ -128,7 +116,6 @@ install:
   - cmd: cmake --build ./ --target install --config Release
   # Tango API
   - cmd: cd "C:\projects\cppTango"
-  - cmd: set BOOST_ROOT=%BOOST_ROOT%
   - cmd: set ZMQ_BASE=C:/projects/zeromq/
   - cmd: set CPPZMQ_BASE=C:/projects/zeromq/
   - cmd: set OMNI_BASE=C:/projects/omniorb/

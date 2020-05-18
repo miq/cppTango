@@ -1,19 +1,16 @@
-
 set(COMPILER_TAG ${CMAKE_VS_PLATFORM_TOOLSET})
 string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE_TAG)
-set(ARCH_TAG "x86")
-set(VARIANT_TAG "static")
-
-if(MSVC90)
-    set(COMPILER_TAG "v90")
-endif()
 
 if(CMAKE_CL_64)
     set(ARCH_TAG "x64")
+else()
+    set(ARCH_TAG "x86")
 endif()
 
 if (TANGO_BUILD_SHARED)
     set(VARIANT_TAG "shared")
+else()
+    set(VARIANT_TAG "static")
 endif()
 
 set(CPACK_PACKAGE_FILE_NAME libtango_${LIBRARY_VERSION}_${COMPILER_TAG}_${ARCH_TAG}_${VARIANT_TAG}_${BUILD_TYPE_TAG})

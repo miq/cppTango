@@ -32,7 +32,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/log4tango/include)
 #source code
 add_subdirectory("log4tango")
 add_subdirectory("cppapi")
-if(NOT WIN32)
+if(NOT WIN32 AND ${BUILD_TESTING})
     add_subdirectory("cpp_test_suite")
 endif(NOT WIN32)
 
